@@ -1,0 +1,6 @@
+{
+  "name": "StyleMirror",
+  "description": "Upload a photo of a person and use AI to change their hair and clothing style, while preserving their identity.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}

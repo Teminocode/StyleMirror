@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StyleMirror</title>
+    <link rel="stylesheet" href="index.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/genai": "https://esm.run/@google/genai"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <aside class="controls-panel">
+        <header class="app-header">
+          <h1 class="logo">Style<span class="logo-gradient">Mirror</span></h1>
+          <p class="tagline">See Yourself in New Styles</p>
+        </header>
+
+        <!-- Main Upload Card -->
+        <div class="upload-section">
+          <p class="disclaimer">
+            Upload only your own photo or one you have permission to edit.
+          </p>
+          <div id="upload-card" class="upload-card">
+            <div id="upload-prompt">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <button id="upload-btn" class="btn btn-secondary-solid">
+                <i class="fa-solid fa-upload"></i> Upload Your Photo
+              </button>
+            </div>
+            <img
+              id="base-image-preview"
+              class="image-preview hidden"
+              alt="Your uploaded photo"
+            />
+          </div>
+        </div>
+        <input type="file" id="base-image-upload" accept="image/*" hidden />
+
+        <!-- Style Selection -->
+        <div class="controls-grid">
+          <div class="control-group">
+            <label for="hairstyle-select">Hairstyle</label>
+            <div class="select-wrapper">
+              <select id="hairstyle-select"></select>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label for="hair-color-select">Hair Color</label>
+            <div class="select-wrapper">
+              <select id="hair-color-select"></select>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label for="outfit-select">Outfit</label>
+            <div class="select-wrapper">
+              <select id="outfit-select"></select>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label for="background-select">Background</label>
+            <div class="select-wrapper">
+              <select id="background-select"></select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="button-group">
+          <button id="generate-btn" class="btn btn-primary" disabled>
+            <i class="fa-solid fa-lightbulb"></i> Apply Style
+          </button>
+          <button id="reset-btn" class="btn btn-secondary-outline">
+            <i class="fa-solid fa-arrows-rotate"></i> Reset
+          </button>
+        </div>
+      </aside>
+
+      <main class="output-panel">
+        <div id="output-placeholder">
+          <i class="fa-solid fa-image"></i>
+          <p>Your new look will appear here</p>
+        </div>
+        <div id="loading-spinner" class="hidden"></div>
+
+        <!-- Before/After Comparison View -->
+        <div id="comparison-container" class="comparison-container hidden">
+          <!-- Before image is the background -->
+          <img
+            id="comparison-before"
+            class="comparison-image"
+            alt="Original (Before)"
+          />
+
+          <!-- After image sits on top and is clipped -->
+          <div id="comparison-after-wrapper" class="comparison-image">
+            <img id="comparison-after" alt="Styled (After)" />
+          </div>
+
+          <!-- Slider sits on top of everything -->
+          <div id="comparison-slider" class="comparison-slider">
+            <div class="comparison-handle">
+              <i class="fa-solid fa-arrows-left-right"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Output Actions -->
+        <div id="output-actions" class="output-actions hidden">
+          <button id="undo-btn" class="btn btn-secondary-solid">
+            <i class="fa-solid fa-rotate-left"></i> Undo
+          </button>
+          <button id="redo-btn" class="btn btn-secondary-solid">
+            <i class="fa-solid fa-rotate-right"></i> Redo
+          </button>
+          <button id="download-btn" class="btn btn-secondary-solid">
+            <i class="fa-solid fa-download"></i> Download
+          </button>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

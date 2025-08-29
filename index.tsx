@@ -17,6 +17,11 @@ const HAIRSTYLE_EXAMPLES = [
   'Bone Straight',
   'Pixie Cut',
   'Cornrows',
+  'Short Crew Cut',
+  'Side Part',
+  'Undercut',
+  'Fade with Textured Top',
+  'Man Bun',
 ];
 
 const HAIR_COLOR_EXAMPLES = [
@@ -36,6 +41,14 @@ const HAIR_COLOR_EXAMPLES = [
 
 const OUTFIT_EXAMPLES = [
   'Business Suit',
+  'Stylish Modern Suits',
+  'Bold Business Outfit',
+  'Creative Corporate Wears',
+  'Formal Office Dress',
+  'Smart Casual (Blazer + Pants)',
+  'Chic Blouse + Trousers',
+  'Modern Jumpsuit',
+  'Classic Trench Coat',
   'Casual T-Shirt & Jeans',
   'Evening Gown',
   'Leather Jacket',
@@ -43,20 +56,23 @@ const OUTFIT_EXAMPLES = [
   'Cozy Sweater',
   'Cocktail Dress',
   'Streetwear (Hoodie + Joggers)',
-  'Smart Casual (Blazer + Pants)',
   'African Print Dress',
   'Denim Jacket + Skirt',
-  'Classic Trench Coat',
-  'Modern Jumpsuit',
-  'Formal Office Dress',
-  'Chic Blouse + Trousers',
   'Winter Coat + Scarf',
   'Maxi Dress',
   'Trendy Party Dress',
+  'Classic Tuxedo',
+  "Men's Three-Piece Suit",
+  'Business Casual (Polo + Chinos)',
 ];
 
 const BACKGROUND_EXAMPLES = [
   'Studio Plain',
+  'Minimalist Studio (White)',
+  'Neutral Gray Wall',
+  'Subtle Textured Wall',
+  'Modern Office Interior',
+  'Corporate Lobby',
   'Outdoor City',
   'Beach',
   'Forest',
@@ -371,7 +387,7 @@ async function generateImage() {
   updateLoadingState();
 
   try {
-    let textPrompt = `You are an expert photo editor. Edit the provided photo of a person.`;
+    let textPrompt = `You are an expert photo editor. Your task is to edit the provided photo of a person with the highest quality, ensuring photorealistic results and fine details.`;
     const edits = [];
     if (selectedHairstyle) {
       edits.push(`Change their hairstyle to: "${selectedHairstyle}".`);
@@ -387,16 +403,15 @@ async function generateImage() {
     }
 
     if (edits.length > 0) {
-      textPrompt += '\n' + edits.join('\n');
+      textPrompt += '\n\nPerform the following edits:\n' + edits.join('\n');
     }
 
-    textPrompt += `\n\nCRITICAL INSTRUCTION: You MUST preserve the person's identity.
-      - DO NOT change their face shape.
-      - DO NOT change their facial features (eyes, nose, mouth).
-      - DO NOT change their skin tone or age.
-      - DO NOT change their expression or any makeup.
-      - DO NOT change the lighting on their face.
-      - ONLY modify the items requested. If an item (hair, clothing, background) is not mentioned in the edits above, you MUST leave it completely unchanged from the original photo.`;
+    textPrompt += `\n\n**CRITICAL INSTRUCTIONS - IDENTITY PRESERVATION:**
+- **Primary Goal:** Always preserve the subject’s identity. The final image must look like the same person.
+- **Face:** You MUST NOT alter the person’s face in any way. This includes face shape, skin tone, age, gender, makeup, or expression.
+- **Facial Features:** DO NOT change facial features such as eyes, nose, lips, or eyebrows.
+- **Realism:** Maintain the original photo's realism. The edits should blend seamlessly. Maintain the original lighting on the face and the person's pose.
+- **Scope:** ONLY modify the items explicitly requested. If an item (hair, clothing, background) is not mentioned in the edits above, you MUST leave it completely unchanged from the original photo.`;
 
     const contentParts: Part[] = [];
 

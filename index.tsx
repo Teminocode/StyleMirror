@@ -51,16 +51,18 @@ const OUTFIT_EXAMPLES = [
   'Classic Trench Coat',
   'Casual T-Shirt & Jeans',
   'Evening Gown',
+  'Elegant Dinner Gown',
   'Leather Jacket',
   'Summer Dress',
   'Cozy Sweater',
   'Cocktail Dress',
+  'Trendy Party Dress',
+  'Sequin Party Dress',
   'Streetwear (Hoodie + Joggers)',
   'African Print Dress',
   'Denim Jacket + Skirt',
   'Winter Coat + Scarf',
   'Maxi Dress',
-  'Trendy Party Dress',
   'Classic Tuxedo',
   "Men's Three-Piece Suit",
   'Business Casual (Polo + Chinos)',
@@ -100,6 +102,9 @@ const outfitSelect = document.getElementById(
 const backgroundSelect = document.getElementById(
   'background-select',
 ) as HTMLSelectElement;
+const maternityCheckbox = document.getElementById(
+  'maternity-checkbox',
+) as HTMLInputElement;
 const generateBtn = document.getElementById('generate-btn') as HTMLButtonElement;
 const resetBtn = document.getElementById('reset-btn') as HTMLButtonElement;
 const outputPlaceholder = document.getElementById(
@@ -140,6 +145,7 @@ let selectedHairstyle = '';
 let selectedHairColor = '';
 let selectedOutfit = '';
 let selectedBackground = '';
+let isMaternityStyle = false;
 let history: string[] = [];
 let historyIndex = -1;
 
@@ -177,7 +183,8 @@ function validateState() {
     selectedHairstyle !== '' ||
     selectedHairColor !== '' ||
     selectedOutfit !== '' ||
-    selectedBackground !== '';
+    selectedBackground !== '' ||
+    isMaternityStyle;
   const isReady = baseImageFile !== null && isAnyStyleSelected;
   generateBtn.disabled = !isReady || isLoading;
 }
@@ -261,7 +268,7 @@ function populateDropdowns() {
   outfitPlaceholder.selected = true;
   outfitSelect.appendChild(outfitPlaceholder);
 
-  OUTFIT_EXAMPLES.forEach((style) => {
+  OUTFIT_EXAMPLES.sort().forEach((style) => {
     const option = document.createElement('option');
     option.value = style;
     option.textContent = style;
@@ -323,10 +330,13 @@ function resetApp() {
   hairColorSelect.selectedIndex = 0;
   outfitSelect.selectedIndex = 0;
   backgroundSelect.selectedIndex = 0;
+  maternityCheckbox.checked = false;
+
   selectedHairstyle = '';
   selectedHairColor = '';
   selectedOutfit = '';
   selectedBackground = '';
+  isMaternityStyle = false;
 
   validateState();
   updateUndoRedoState();
@@ -377,7 +387,8 @@ async function generateImage() {
     selectedHairstyle ||
     selectedHairColor ||
     selectedOutfit ||
-    selectedBackground;
+    selectedBackground ||
+    isMaternityStyle;
 
   if (!baseImageFile || isLoading || !isAnyStyleSelected) {
     return;
@@ -389,6 +400,11 @@ async function generateImage() {
   try {
     let textPrompt = `You are an expert photo editor. Your task is to edit the provided photo of a person with the highest quality, ensuring photorealistic results and fine details.`;
     const edits = [];
+    if (isMaternityStyle) {
+      edits.push(
+        `Transform this into a maternity photoshoot. Add a realistic and natural-looking baby bump to the person. The style should be elegant and celebratory. Ensure the bump looks appropriate for the person's body frame.`,
+      );
+    }
     if (selectedHairstyle) {
       edits.push(`Change their hairstyle to: "${selectedHairstyle}".`);
     }
@@ -410,6 +426,7 @@ async function generateImage() {
 - **Primary Goal:** Always preserve the subject’s identity. The final image must look like the same person.
 - **Face:** You MUST NOT alter the person’s face in any way. This includes face shape, skin tone, age, gender, makeup, or expression.
 - **Facial Features:** DO NOT change facial features such as eyes, nose, lips, or eyebrows.
+- **Body Shape:** Unless specifically requested for a maternity style, do not alter the person's body shape or size. If a maternity style is requested, add a baby bump naturally while keeping the rest of their proportions consistent with the original photo.
 - **Realism:** Maintain the original photo's realism. The edits should blend seamlessly. Maintain the original lighting on the face and the person's pose.
 - **Scope:** ONLY modify the items explicitly requested. If an item (hair, clothing, background) is not mentioned in the edits above, you MUST leave it completely unchanged from the original photo.`;
 
@@ -548,6 +565,11 @@ function initializeApp() {
 
   backgroundSelect.addEventListener('change', (e) => {
     selectedBackground = (e.target as HTMLSelectElement).value;
+    validateState();
+  });
+
+  maternityCheckbox.addEventListener('change', (e) => {
+    isMaternityStyle = (e.target as HTMLInputElement).checked;
     validateState();
   });
 

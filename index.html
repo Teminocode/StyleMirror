@@ -46,6 +46,37 @@
         </div>
         <input type="file" id="base-image-upload" accept="image/*" hidden />
 
+        <!-- Reference Image Upload Card -->
+        <div class="reference-upload-section">
+          <label>Reference Style Image (Optional)</label>
+          <div id="reference-upload-card" class="upload-card-small">
+            <div id="reference-upload-prompt">
+              <button
+                id="reference-upload-btn"
+                class="btn btn-secondary-solid"
+              >
+                <i class="fa-solid fa-upload"></i> Upload Style Image
+              </button>
+            </div>
+            <div id="reference-image-container" class="hidden">
+              <img
+                id="reference-image-preview"
+                class="image-preview"
+                alt="Reference style photo"
+              />
+              <button id="remove-reference-btn" title="Remove image">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <input
+          type="file"
+          id="reference-image-upload"
+          accept="image/*"
+          hidden
+        />
+
         <!-- Style Selection -->
         <div class="controls-grid">
           <div class="control-group">
@@ -63,9 +94,27 @@
           </div>
 
           <div class="control-group">
-            <label for="outfit-select">Outfit</label>
+            <label for="outfit-select">Outfit Style</label>
             <div class="select-wrapper">
               <select id="outfit-select"></select>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label for="outfit-color-input">Outfit Color Change</label>
+            <input
+              type="text"
+              id="outfit-color-input"
+              class="text-input"
+              placeholder="e.g., 'black dress to red'"
+            />
+            <div id="outfit-color-palette" class="color-palette"></div>
+          </div>
+
+          <div class="control-group">
+            <label for="shoe-select">Shoes</label>
+            <div class="select-wrapper">
+              <select id="shoe-select"></select>
             </div>
           </div>
 
@@ -80,11 +129,24 @@
         <!-- Optional Styles -->
         <div class="optional-styles">
           <div class="control-group">
+            <label for="photoshoot-style-select">Photoshoot Style</label>
+            <div class="select-wrapper">
+              <select id="photoshoot-style-select"></select>
+            </div>
+          </div>
+
+          <!-- Maternity Styles -->
+          <div class="control-group">
             <label class="checkbox-label" for="maternity-checkbox">
               <input type="checkbox" id="maternity-checkbox" />
               <span class="checkbox-custom"></span>
-              Maternity Style Photoshoot
+              Maternity Photoshoot
             </label>
+            <div id="maternity-options-container" class="hidden">
+              <div class="select-wrapper">
+                <select id="maternity-style-select"></select>
+              </div>
+            </div>
           </div>
         </div>
 

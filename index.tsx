@@ -68,6 +68,43 @@ const OUTFIT_EXAMPLES = [
   'Business Casual (Polo + Chinos)',
 ];
 
+const OUTFIT_COLOR_PALETTE = [
+  'Red',
+  'Blue',
+  'Green',
+  'Yellow',
+  'Black',
+  'White',
+  'Pink',
+  'Purple',
+  'Orange',
+  'Gray',
+  'Brown',
+  'Beige',
+];
+
+const SHOE_EXAMPLES = [
+  'High Heels',
+  'Stilettos',
+  'Wedges',
+  'Ankle Boots',
+  'Knee-High Boots',
+  'Platform Shoes',
+  'Ballet Flats',
+  'Sneakers (Athletic)',
+  'Sneakers (Fashion)',
+  'Sandals (Flat)',
+  'Sandals (Heeled)',
+  'Loafers',
+  'Oxfords',
+  'Brogues',
+  "Dress Shoes (Men's)",
+  'Combat Boots',
+  'Flip-Flops',
+  'Espadrilles',
+  'Mules',
+];
+
 const BACKGROUND_EXAMPLES = [
   'Studio Plain',
   'Minimalist Studio (White)',
@@ -79,6 +116,36 @@ const BACKGROUND_EXAMPLES = [
   'Beach',
   'Forest',
   'Abstract Gradient',
+  'Neon Cyberpunk Cityscape',
+  'Enchanted Forest at Twilight',
+  'Vintage Film Set',
+  'Grand Library Interior',
+  'Art Deco Speakeasy',
+  'Bohemian Chic room with plants',
+  'Futuristic Spaceship Bridge',
+  'Dramatic Mountain Peak',
+  'Cozy Coffee Shop',
+  'Graffiti Wall in an Urban Alley',
+];
+
+const PHOTOSHOOT_STYLE_EXAMPLES = [
+  'Professional Headshot',
+  'Fantasy Cosplay',
+  'Golden Hour Portrait',
+  'Film Noir (Black & White)',
+  'High-Fashion Magazine Cover',
+  'Vibrant Street Style',
+  'Surrealist Art Piece',
+  'Vintage Sepia Tone',
+];
+
+const MATERNITY_STYLE_EXAMPLES = [
+  'Classic Elegant Gown',
+  'Newspaper Announcement (Baby Coming Soon)',
+  'Studio with "BABY" Light-Up Letters',
+  'Festive Holiday / Christmas Theme',
+  'Artistic Giant White Flower Backdrop',
+  'Elegant Gown with "MOM" Letters',
 ];
 
 // --- DOM Element Selection ---
@@ -90,6 +157,26 @@ const uploadPrompt = document.getElementById('upload-prompt') as HTMLDivElement;
 const baseImagePreview = document.getElementById(
   'base-image-preview',
 ) as HTMLImageElement;
+
+const referenceImageInput = document.getElementById(
+  'reference-image-upload',
+) as HTMLInputElement;
+const referenceUploadBtn = document.getElementById(
+  'reference-upload-btn',
+) as HTMLButtonElement;
+const referenceUploadPrompt = document.getElementById(
+  'reference-upload-prompt',
+) as HTMLDivElement;
+const referenceImageContainer = document.getElementById(
+  'reference-image-container',
+) as HTMLDivElement;
+const referenceImagePreview = document.getElementById(
+  'reference-image-preview',
+) as HTMLImageElement;
+const removeReferenceBtn = document.getElementById(
+  'remove-reference-btn',
+) as HTMLButtonElement;
+
 const hairstyleSelect = document.getElementById(
   'hairstyle-select',
 ) as HTMLSelectElement;
@@ -99,12 +186,28 @@ const hairColorSelect = document.getElementById(
 const outfitSelect = document.getElementById(
   'outfit-select',
 ) as HTMLSelectElement;
+const outfitColorInput = document.getElementById(
+  'outfit-color-input',
+) as HTMLInputElement;
+const outfitColorPalette = document.getElementById(
+  'outfit-color-palette',
+) as HTMLDivElement;
+const shoeSelect = document.getElementById('shoe-select') as HTMLSelectElement;
 const backgroundSelect = document.getElementById(
   'background-select',
+) as HTMLSelectElement;
+const photoshootStyleSelect = document.getElementById(
+  'photoshoot-style-select',
 ) as HTMLSelectElement;
 const maternityCheckbox = document.getElementById(
   'maternity-checkbox',
 ) as HTMLInputElement;
+const maternityOptionsContainer = document.getElementById(
+  'maternity-options-container',
+) as HTMLDivElement;
+const maternityStyleSelect = document.getElementById(
+  'maternity-style-select',
+) as HTMLSelectElement;
 const generateBtn = document.getElementById('generate-btn') as HTMLButtonElement;
 const resetBtn = document.getElementById('reset-btn') as HTMLButtonElement;
 const outputPlaceholder = document.getElementById(
@@ -139,13 +242,18 @@ const comparisonSlider = document.getElementById(
 
 // --- State Management ---
 let baseImageFile: File | null = null;
+let referenceImageFile: File | null = null;
 let generatedImageUrl: string | null = null;
 let isLoading = false;
 let selectedHairstyle = '';
 let selectedHairColor = '';
 let selectedOutfit = '';
+let selectedOutfitColor = '';
+let selectedShoes = '';
 let selectedBackground = '';
+let selectedPhotoshootStyle = '';
 let isMaternityStyle = false;
+let selectedMaternityStyle = '';
 let history: string[] = [];
 let historyIndex = -1;
 
@@ -180,11 +288,15 @@ async function fileToGenerativePart(
  */
 function validateState() {
   const isAnyStyleSelected =
+    referenceImageFile !== null ||
     selectedHairstyle !== '' ||
     selectedHairColor !== '' ||
     selectedOutfit !== '' ||
+    selectedOutfitColor !== '' ||
+    selectedShoes !== '' ||
     selectedBackground !== '' ||
-    isMaternityStyle;
+    selectedPhotoshootStyle !== '' ||
+    selectedMaternityStyle !== '';
   const isReady = baseImageFile !== null && isAnyStyleSelected;
   generateBtn.disabled = !isReady || isLoading;
 }
@@ -225,6 +337,37 @@ function updateLoadingState() {
 }
 
 // --- UI Functions ---
+
+/**
+ * Populates the color palette with clickable swatches.
+ */
+function populateColorPalette() {
+  OUTFIT_COLOR_PALETTE.forEach((color) => {
+    const swatch = document.createElement('div');
+    swatch.classList.add('color-swatch');
+    swatch.style.backgroundColor = color;
+    swatch.dataset.color = color;
+    swatch.title = color;
+
+    swatch.addEventListener('click', () => {
+      // Deselect any other swatch
+      const currentlySelected = document.querySelector('.color-swatch.selected');
+      if (currentlySelected) {
+        currentlySelected.classList.remove('selected');
+      }
+
+      // Select the new one
+      swatch.classList.add('selected');
+
+      // Update state and input field
+      selectedOutfitColor = color;
+      outfitColorInput.value = color;
+      validateState();
+    });
+
+    outfitColorPalette.appendChild(swatch);
+  });
+}
 
 /**
  * Populates the dropdown menus with style options.
@@ -275,6 +418,21 @@ function populateDropdowns() {
     outfitSelect.appendChild(option);
   });
 
+  // Shoe Dropdown
+  const shoePlaceholder = document.createElement('option');
+  shoePlaceholder.value = '';
+  shoePlaceholder.textContent = 'Select Shoes';
+  shoePlaceholder.disabled = true;
+  shoePlaceholder.selected = true;
+  shoeSelect.appendChild(shoePlaceholder);
+
+  SHOE_EXAMPLES.sort().forEach((style) => {
+    const option = document.createElement('option');
+    option.value = style;
+    option.textContent = style;
+    shoeSelect.appendChild(option);
+  });
+
   // Background Dropdown
   const backgroundPlaceholder = document.createElement('option');
   backgroundPlaceholder.value = '';
@@ -283,11 +441,41 @@ function populateDropdowns() {
   backgroundPlaceholder.selected = true;
   backgroundSelect.appendChild(backgroundPlaceholder);
 
-  BACKGROUND_EXAMPLES.forEach((style) => {
+  BACKGROUND_EXAMPLES.sort().forEach((style) => {
     const option = document.createElement('option');
     option.value = style;
     option.textContent = style;
     backgroundSelect.appendChild(option);
+  });
+
+  // Photoshoot Style Dropdown
+  const photoshootStylePlaceholder = document.createElement('option');
+  photoshootStylePlaceholder.value = '';
+  photoshootStylePlaceholder.textContent = 'Select Photoshoot Style';
+  photoshootStylePlaceholder.disabled = true;
+  photoshootStylePlaceholder.selected = true;
+  photoshootStyleSelect.appendChild(photoshootStylePlaceholder);
+
+  PHOTOSHOOT_STYLE_EXAMPLES.forEach((style) => {
+    const option = document.createElement('option');
+    option.value = style;
+    option.textContent = style;
+    photoshootStyleSelect.appendChild(option);
+  });
+
+  // Maternity Style Dropdown
+  const maternityStylePlaceholder = document.createElement('option');
+  maternityStylePlaceholder.value = '';
+  maternityStylePlaceholder.textContent = 'Select Maternity Style';
+  maternityStylePlaceholder.disabled = true;
+  maternityStylePlaceholder.selected = true;
+  maternityStyleSelect.appendChild(maternityStylePlaceholder);
+
+  MATERNITY_STYLE_EXAMPLES.forEach((style) => {
+    const option = document.createElement('option');
+    option.value = style;
+    option.textContent = style;
+    maternityStyleSelect.appendChild(option);
   });
 }
 
@@ -306,6 +494,30 @@ function handleBaseImageUpload(file: File) {
 }
 
 /**
+ * Handles the file selection for the reference image.
+ * @param file The selected file.
+ */
+function handleReferenceImageUpload(file: File) {
+  referenceImageFile = file;
+  referenceImagePreview.src = URL.createObjectURL(file);
+  referenceUploadPrompt.classList.add('hidden');
+  referenceImageContainer.classList.remove('hidden');
+  validateState();
+}
+
+/**
+ * Handles the removal of the reference image.
+ */
+function handleRemoveReferenceImage() {
+  referenceImageFile = null;
+  referenceImageInput.value = '';
+  referenceImagePreview.src = '';
+  referenceUploadPrompt.classList.remove('hidden');
+  referenceImageContainer.classList.add('hidden');
+  validateState();
+}
+
+/**
  * Resets the application to its initial state.
  */
 function resetApp() {
@@ -319,6 +531,8 @@ function resetApp() {
   uploadPrompt.classList.remove('hidden');
   baseImagePreview.classList.add('hidden');
 
+  handleRemoveReferenceImage();
+
   comparisonContainer.classList.add('hidden');
   comparisonBefore.src = '';
   comparisonAfter.src = '';
@@ -329,14 +543,26 @@ function resetApp() {
   hairstyleSelect.selectedIndex = 0;
   hairColorSelect.selectedIndex = 0;
   outfitSelect.selectedIndex = 0;
+  outfitColorInput.value = '';
+  document
+    .querySelector('.color-swatch.selected')
+    ?.classList.remove('selected');
+  shoeSelect.selectedIndex = 0;
   backgroundSelect.selectedIndex = 0;
+  photoshootStyleSelect.selectedIndex = 0;
   maternityCheckbox.checked = false;
+  maternityStyleSelect.selectedIndex = 0;
+  maternityOptionsContainer.classList.add('hidden');
 
   selectedHairstyle = '';
   selectedHairColor = '';
   selectedOutfit = '';
+  selectedOutfitColor = '';
+  selectedShoes = '';
   selectedBackground = '';
+  selectedPhotoshootStyle = '';
   isMaternityStyle = false;
+  selectedMaternityStyle = '';
 
   validateState();
   updateUndoRedoState();
@@ -384,11 +610,15 @@ function handleRedo() {
  */
 async function generateImage() {
   const isAnyStyleSelected =
+    referenceImageFile ||
     selectedHairstyle ||
     selectedHairColor ||
     selectedOutfit ||
+    selectedOutfitColor ||
+    selectedShoes ||
     selectedBackground ||
-    isMaternityStyle;
+    selectedPhotoshootStyle ||
+    selectedMaternityStyle;
 
   if (!baseImageFile || isLoading || !isAnyStyleSelected) {
     return;
@@ -398,50 +628,96 @@ async function generateImage() {
   updateLoadingState();
 
   try {
-    let textPrompt = `You are an expert photo editor. Your task is to edit the provided photo of a person with the highest quality, ensuring photorealistic results and fine details.`;
-    const edits = [];
-    if (isMaternityStyle) {
+    const contentParts: Part[] = [];
+    const edits: string[] = [];
+
+    let textPrompt = `You are a world-class photo editor. Your task is to perform a sophisticated style transfer. You will be given one or two images.
+
+**Image Roles:**
+- The FIRST image provided is the **PHOTO TO EDIT**. This contains the person whose appearance you will modify.
+- The SECOND image (if provided) is the **STYLE REFERENCE**. This image is for inspiration only.
+
+**Your Goal:**
+Apply the style from the **STYLE REFERENCE** image to the **PHOTO TO EDIT**. This includes elements like clothing style, color palette, lighting, background, and overall mood. If no style reference is given, use the specific text instructions below.
+
+**CRITICAL RULES - IDENTITY PRESERVATION:**
+- **DO NOT CHANGE THE PERSON'S FACE.** The face shape, facial features (eyes, nose, mouth), skin tone, and identity of the person in the **PHOTO TO EDIT** must be perfectly preserved.
+- **DO NOT MERGE THE IMAGES.** The final output should not be a collage or combination of the two source images.
+- **DO NOT COPY THE PERSON from the STYLE REFERENCE.** The output must only feature the person from the **PHOTO TO EDIT**.
+- Unless a maternity style is requested, do not alter the person's body shape or size.
+- Maintain the original photo's realism and the person's pose. The edits should blend seamlessly.
+- ONLY modify the items explicitly requested. If an item (hair, clothing, background) is not mentioned, leave it unchanged.
+
+**SPECIFIC EDITS TO PERFORM:**
+`;
+
+    if (referenceImageFile) {
       edits.push(
-        `Transform this into a maternity photoshoot. Add a realistic and natural-looking baby bump to the person. The style should be elegant and celebratory. Ensure the bump looks appropriate for the person's body frame.`,
+        `Use the provided STYLE REFERENCE image as the primary guide for the overall aesthetic (clothing, colors, mood, lighting, composition).`,
       );
     }
+
+    if (isMaternityStyle && selectedMaternityStyle) {
+      edits.push(
+        `Transform this into a maternity photoshoot. Add a realistic and natural-looking baby bump to the person.`,
+      );
+      edits.push(
+        `The specific maternity style is: "${selectedMaternityStyle}".`,
+      );
+    } else if (selectedPhotoshootStyle) {
+      edits.push(
+        `Overall photoshoot style should be: "${selectedPhotoshootStyle}".`,
+      );
+    }
+
     if (selectedHairstyle) {
-      edits.push(`Change their hairstyle to: "${selectedHairstyle}".`);
+      edits.push(`Change hairstyle to: "${selectedHairstyle}".`);
     }
     if (selectedHairColor) {
-      edits.push(`Change their hair color to: "${selectedHairColor}".`);
+      edits.push(`Change hair color to: "${selectedHairColor}".`);
     }
     if (selectedOutfit) {
-      edits.push(`Change their outfit to: "${selectedOutfit}".`);
+      edits.push(`Change outfit to: "${selectedOutfit}".`);
+    }
+    if (selectedOutfitColor) {
+      edits.push(
+        `Change the color of their outfit as described: "${selectedOutfitColor}". Important: Only change the color, not the style of the clothing unless a new style is also specified.`,
+      );
+    }
+    if (selectedShoes) {
+      edits.push(`Change shoes to: "${selectedShoes}".`);
     }
     if (selectedBackground) {
-      edits.push(`Change the background to: "${selectedBackground}".`);
+      edits.push(`Change background to: "${selectedBackground}".`);
     }
 
     if (edits.length > 0) {
-      textPrompt += '\n\nPerform the following edits:\n' + edits.join('\n');
+      textPrompt += edits.map((edit) => `- ${edit}`).join('\n');
+    } else {
+      textPrompt +=
+        '- No specific text edits requested. Rely on the style reference image if provided.';
     }
 
-    textPrompt += `\n\n**CRITICAL INSTRUCTIONS - IDENTITY PRESERVATION:**
-- **Primary Goal:** Always preserve the subject’s identity. The final image must look like the same person.
-- **Face:** You MUST NOT alter the person’s face in any way. This includes face shape, skin tone, age, gender, makeup, or expression.
-- **Facial Features:** DO NOT change facial features such as eyes, nose, lips, or eyebrows.
-- **Body Shape:** Unless specifically requested for a maternity style, do not alter the person's body shape or size. If a maternity style is requested, add a baby bump naturally while keeping the rest of their proportions consistent with the original photo.
-- **Realism:** Maintain the original photo's realism. The edits should blend seamlessly. Maintain the original lighting on the face and the person's pose.
-- **Scope:** ONLY modify the items explicitly requested. If an item (hair, clothing, background) is not mentioned in the edits above, you MUST leave it completely unchanged from the original photo.`;
+    textPrompt += `\n\nProduce a single, photorealistic final image.`;
 
-    const contentParts: Part[] = [];
-
-    // Add base image
-    const baseImagePart = await fileToGenerativePart(baseImageFile);
-    contentParts.push(baseImagePart);
+    // 1. Add the comprehensive text prompt first.
     contentParts.push({ text: textPrompt });
 
+    // 2. Add the base image (PHOTO TO EDIT).
+    const baseImagePart = await fileToGenerativePart(baseImageFile);
+    contentParts.push(baseImagePart);
+
+    // 3. Add the reference image if it exists (STYLE REFERENCE).
+    if (referenceImageFile) {
+      const referenceImagePart = await fileToGenerativePart(referenceImageFile);
+      contentParts.push(referenceImagePart);
+    }
+
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image-preview',
+      model: 'gemini-2.5-flash-image',
       contents: { parts: contentParts },
       config: {
-        responseModalities: [Modality.IMAGE, Modality.TEXT],
+        responseModalities: [Modality.IMAGE],
       },
     });
 
@@ -473,7 +749,16 @@ async function generateImage() {
       outputPlaceholder.classList.add('hidden');
       updateUndoRedoState();
     } else {
-      throw new Error('No image was generated. Please try again.');
+      const textResponse = response.text?.trim();
+      if (textResponse) {
+        throw new Error(
+          `Image generation failed. The model responded: "${textResponse}"`,
+        );
+      } else {
+        throw new Error(
+          'No image was generated and no error message was provided. Please check the model configuration and try again.',
+        );
+      }
     }
   } catch (error) {
     console.error(error);
@@ -539,6 +824,7 @@ function initComparisonSlider() {
  */
 function initializeApp() {
   populateDropdowns();
+  populateColorPalette();
   initComparisonSlider();
 
   // --- Event Listeners ---
@@ -547,6 +833,15 @@ function initializeApp() {
     const file = (e.target as HTMLInputElement).files?.[0];
     if (file) handleBaseImageUpload(file);
   });
+
+  referenceUploadBtn.addEventListener('click', () =>
+    referenceImageInput.click(),
+  );
+  referenceImageInput.addEventListener('change', (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (file) handleReferenceImageUpload(file);
+  });
+  removeReferenceBtn.addEventListener('click', handleRemoveReferenceImage);
 
   hairstyleSelect.addEventListener('change', (e) => {
     selectedHairstyle = (e.target as HTMLSelectElement).value;
@@ -563,13 +858,56 @@ function initializeApp() {
     validateState();
   });
 
+  outfitColorInput.addEventListener('input', (e) => {
+    selectedOutfitColor = (e.target as HTMLInputElement).value.trim();
+    // Deselect any swatch if the user types manually
+    const currentlySelected = document.querySelector('.color-swatch.selected');
+    if (currentlySelected) {
+      currentlySelected.classList.remove('selected');
+    }
+    validateState();
+  });
+
+  shoeSelect.addEventListener('change', (e) => {
+    selectedShoes = (e.target as HTMLSelectElement).value;
+    validateState();
+  });
+
   backgroundSelect.addEventListener('change', (e) => {
     selectedBackground = (e.target as HTMLSelectElement).value;
     validateState();
   });
 
+  photoshootStyleSelect.addEventListener('change', (e) => {
+    selectedPhotoshootStyle = (e.target as HTMLSelectElement).value;
+    // Make styles mutually exclusive
+    if (selectedPhotoshootStyle) {
+      maternityCheckbox.checked = false;
+      isMaternityStyle = false;
+      selectedMaternityStyle = '';
+      maternityStyleSelect.selectedIndex = 0;
+      maternityOptionsContainer.classList.add('hidden');
+    }
+    validateState();
+  });
+
   maternityCheckbox.addEventListener('change', (e) => {
     isMaternityStyle = (e.target as HTMLInputElement).checked;
+    if (isMaternityStyle) {
+      maternityOptionsContainer.classList.remove('hidden');
+      // Make styles mutually exclusive
+      photoshootStyleSelect.selectedIndex = 0;
+      selectedPhotoshootStyle = '';
+    } else {
+      maternityOptionsContainer.classList.add('hidden');
+      maternityStyleSelect.selectedIndex = 0;
+      selectedMaternityStyle = '';
+    }
+    validateState();
+  });
+
+  maternityStyleSelect.addEventListener('change', (e) => {
+    selectedMaternityStyle = (e.target as HTMLSelectElement).value;
     validateState();
   });
 

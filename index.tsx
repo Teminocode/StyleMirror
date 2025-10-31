@@ -569,16 +569,33 @@ function resetApp() {
 }
 
 /**
- * Triggers the download of the generated image.
+ * Triggers the download of the generated image. This method is more robust
+ * and works better on mobile devices by converting the data URL to a Blob.
  */
-function downloadImage() {
+async function downloadImage() {
   if (!generatedImageUrl) return;
-  const a = document.createElement('a');
-  a.href = generatedImageUrl;
-  a.download = 'stylemirror-image.png';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+
+  try {
+    // Convert data URL to blob for better cross-browser support
+    const response = await fetch(generatedImageUrl);
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'stylemirror-image.png';
+    document.body.appendChild(a);
+    a.click();
+
+    // Cleanup
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Download failed:', error);
+    alert(
+      'Could not download the image. Please try long-pressing the image and selecting "Save Image".',
+    );
+  }
 }
 
 /**
